@@ -6,6 +6,7 @@ const formulario = document.querySelector('form')
 const tablaProductos = document.getElementById('tablaProductos');
 const btnBuscar = document.getElementById('btnBuscar');
 const btnModificar = document.getElementById('btnModificar');
+const btnEliminar = document.getElementById('btnEliminar');
 const btnGuardar = document.getElementById('btnGuardar');
 const btnCancelar = document.getElementById('btnCancelar');
 const divTabla = document.getElementById('divTabla');
@@ -81,6 +82,7 @@ const buscar = async () => {
     try {
         const respuesta = await fetch(url, config)
         const data = await respuesta.json();
+        console.log(data)
         
         tablaProductos.tBodies[0].innerHTML = ''
         const fragment = document.createDocumentFragment();
@@ -142,9 +144,9 @@ const buscar = async () => {
 }
 
 const colocarDatos = (datos) => {
-    formulario.producto_nombre.value = datos.PRODUCTO_NOMBRE
-    formulario.producto_precio.value = datos.PRODUCTO_PRECIO
-    formulario.producto_id.value = datos.PRODUCTO_ID
+    formulario.producto_nombre.value = datos.producto_nombre
+    formulario.producto_precio.value = datos.producto_precio
+    formulario.producto_id.value = datos.producto_id
 
     btnGuardar.disabled = true
     btnGuardar.parentElement.style.display = 'none'
@@ -176,10 +178,10 @@ const modificar = async () => {
         alert('Debe llenar todos los campos');
         return 
     }
+    const producto_id = formulario.producto_id.value;
 
     const body = new FormData(formulario)
-    body.append('tipo', 2)
-    const url = '/caal_proyecto1/controladores/productos/index.php';
+    const url = `/caal_proyecto1/API/productos/modificar?producto_id=${producto_id}`;
     const config = {
         method : 'POST',
         body
@@ -214,43 +216,57 @@ const modificar = async () => {
     }
 }
 
-const eliminar = async (id) => {
-    if(confirm("¿Desea eliminar este producto?")){
-        const body = new FormData()
-        body.append('tipo', 3)
-        body.append('producto_id', id)
-        const url = '/caal_proyecto1/controladores/productos/index.php';
-        const config = {
-            method : 'POST',
-            body
+const eliminar = async (producto_id) => {
+    const confirmacion = await Swal.fire({
+        icon: 'question',
+        title: '¿Estás seguro?',
+        text: '¿Deseas eliminar este registro?',
+        showCancelButton: true,
+    });
+
+    if (confirmacion.isConfirmed) {
+    const url = '/caal_proyecto1/API/productos/guardar';
+    const body = new FormData();
+    body.append('producto_id', producto_id);
+    body.append('tipo', 3); // Establece 'tipo' como 3 para la solicitud de eliminar
+
+    const config = {
+        method: 'POST', // Debe ser 'POST' para la solicitud de eliminar
+        body,
+    };
+
+    try {
+        const respuesta = await fetch(url, config);
+        const data = await respuesta.json();
+
+        const { codigo, mensaje, detalle } = data;
+
+        switch (codigo) {
+            case 1:
+                formulario.reset();
+                buscar();
+                break;
+        
+            case 0:
+                console.log(detalle)
+                break;
+        
+            default:
+                break;
         }
-        try {
-            const respuesta = await fetch(url, config)
-            const data = await respuesta.json();
-            
-            const {codigo, mensaje,detalle} = data;
-    
-            switch (codigo) {
-                case 1:
-                    buscar();
-                    break;
-            
-                case 0:
-                    console.log(detalle)
-                    break;
-            
-                default:
-                    break;
-            }
-    
-            alert(mensaje);
-    
-        } catch (error) {
-            console.log(error);
-        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'exito',
+            text:mensaje,
+        });
+    } catch (error) {
+        console.log(error);
     }
 }
+}
 buscar();
+
 formulario.addEventListener('submit', guardar )
 btnBuscar.addEventListener('click', buscar)
 btnCancelar.addEventListener('click', cancelarAccion)
