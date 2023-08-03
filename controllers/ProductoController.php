@@ -13,7 +13,7 @@ class ProductoController{
         // var_dump($productos);
         // exit;
         $router->render('productos/index', [
-            'productos' => $productos,
+           'productos' => $productos,
             // 'productos2' => $productos2,
         ]);
 
