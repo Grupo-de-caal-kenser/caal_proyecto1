@@ -219,7 +219,7 @@ const modificar = async () => {
 }
 
 const eliminar = async (id) => {
-    if (await confirmacion('warning','¿desea eliminar este registro?')){
+    if (await confirmacion('warning','¿desea elimina este registro?')){
     const body = new FormData();
     body.append('producto_id', id);
     const url = '/caal_proyecto1/API/productos/eliminar';
@@ -231,6 +231,7 @@ const eliminar = async (id) => {
 
     try {
         const respuesta = await fetch(url, config);
+        
         const data = await respuesta.json();
         console.log(data)
 
