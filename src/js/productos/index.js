@@ -1,12 +1,12 @@
 import { Dropdown } from "bootstrap";
 import Swal from "sweetalert2";
-import { validarFormulario, Toast} from "../funciones";
+import { validarFormulario, Toast, confirmacion} from "../funciones";
+
 
 const formulario = document.querySelector('form')
 const tablaProductos = document.getElementById('tablaProductos');
 const btnBuscar = document.getElementById('btnBuscar');
 const btnModificar = document.getElementById('btnModificar');
-const btnEliminar = document.getElementById('btnEliminar');
 const btnGuardar = document.getElementById('btnGuardar');
 const btnCancelar = document.getElementById('btnCancelar');
 const divTabla = document.getElementById('divTabla');
@@ -82,7 +82,6 @@ const buscar = async () => {
     try {
         const respuesta = await fetch(url, config)
         const data = await respuesta.json();
-        console.log(data)
         
         tablaProductos.tBodies[0].innerHTML = ''
         const fragment = document.createDocumentFragment();
@@ -178,8 +177,6 @@ const modificar = async () => {
         alert('Debe llenar todos los campos');
         return 
     }
-    const producto_id = formulario.producto_id.value;
-
     const body = new FormData(formulario)
     const url = `/caal_proyecto1/API/productos/modificar?producto_id=${producto_id}`;
     const config = {
@@ -193,15 +190,17 @@ const modificar = async () => {
         const data = await respuesta.json();
         
         const {codigo, mensaje,detalle} = data;
-
+        let icon = 'info'
         switch (codigo) {
             case 1:
                 formulario.reset();
+                icon = 'success'
                 buscar();
                 cancelarAccion();
                 break;
         
             case 0:
+                icon = 'error'
                 console.log(detalle)
                 break;
         
@@ -209,45 +208,43 @@ const modificar = async () => {
                 break;
         }
 
-        alert(mensaje);
+        Toast.fire({
+            icon,
+            text: mensaje
+        })
 
     } catch (error) {
         console.log(error);
     }
 }
 
-const eliminar = async (producto_id) => {
-    const confirmacion = await Swal.fire({
-        icon: 'question',
-        title: '¿Estás seguro?',
-        text: '¿Deseas eliminar este registro?',
-        showCancelButton: true,
-    });
-
-    if (confirmacion.isConfirmed) {
-    const url = '/caal_proyecto1/API/productos/guardar';
+const eliminar = async (id) => {
+    if (await confirmacion('warning','¿desea eliminar este registro?')){
     const body = new FormData();
-    body.append('producto_id', producto_id);
-    body.append('tipo', 3); // Establece 'tipo' como 3 para la solicitud de eliminar
+    body.append('producto_id', id);
+    const url = '/caal_proyecto1/API/productos/eliminar';
 
     const config = {
         method: 'POST', // Debe ser 'POST' para la solicitud de eliminar
-        body,
+        body
     };
 
     try {
         const respuesta = await fetch(url, config);
         const data = await respuesta.json();
+        console.log(data)
 
         const { codigo, mensaje, detalle } = data;
+        let icon = 'info'
 
         switch (codigo) {
             case 1:
-                formulario.reset();
+                icon = 'success';
                 buscar();
                 break;
         
             case 0:
+                icon = 'error'
                 console.log(detalle)
                 break;
         
@@ -255,9 +252,8 @@ const eliminar = async (producto_id) => {
                 break;
         }
 
-        Swal.fire({
-            icon: 'success',
-            title: 'exito',
+        Toast.fire({
+            icon,
             text:mensaje,
         });
     } catch (error) {
