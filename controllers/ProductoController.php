@@ -46,7 +46,7 @@ class ProductoController{
     }
 
     public static function buscarAPI(){
-        $productos = Producto::all();
+        //$productos = Producto::all();
         $producto_nombre = $_GET['producto_nombre'];
         $producto_precio = $_GET['producto_precio'];
 
@@ -71,40 +71,22 @@ class ProductoController{
         }
     }
     public static function modificarAPI(){
-        $producto_id = $_POST['producto_id'];
-        $producto_nombre = $_POST['producto_nombre'];
-        $producto_precio = $_POST['producto_precio'];
-    
         try {
-            
-            $producto = Producto::find($producto_id);
-    
-            if (!$producto) {
-                echo json_encode([
-                    'mensaje' => 'Producto no encontrado',
-                    'codigo' => 0
-                ]);
-                return;
-            }
-    
-            
-            $producto->producto_nombre = $producto_nombre;
-            $producto->producto_precio = $producto_precio;
-    
-            
-            $resultado = $producto->guardar();
-    
-            if ($resultado['resultado'] == 1) {
+            $producto = new Producto($_POST);
+            $resultado = $producto->actualizar();
+
+            if($resultado['resultado'] == 1){
                 echo json_encode([
                     'mensaje' => 'Registro modificado correctamente',
                     'codigo' => 1
                 ]);
-            } else {
+            }else{
                 echo json_encode([
-                    'mensaje' => 'Ocurrió un error al modificar el registro',
+                    'mensaje' => 'Ocurrió un error',
                     'codigo' => 0
                 ]);
             }
+            // echo json_encode($resultado);
         } catch (Exception $e) {
             echo json_encode([
                 'detalle' => $e->getMessage(),
@@ -115,35 +97,29 @@ class ProductoController{
     }
 
 
+
     public static function eliminarAPI(){
-        $producto_id = $_POST['producto_id'];
-    
+           
         try {
-            // First, retrieve the product by its ID
+            $producto_id = $_POST['producto_id'];
             $producto = Producto::find($producto_id);
+
+            $producto->producto_situacion = 0;
+            $resultado = $producto->actualizar();
     
-            if (!$producto) {
+            if ($resultado['resultado'] == 1 ){
                 echo json_encode([
-                    'mensaje' => 'Producto no encontrado',
-                    'codigo' => 0
-                ]);
-                return;
-            }
-    
-            // Delete the product from the database
-            $resultado = $producto->eliminar();
-    
-            if ($resultado['resultado'] == 1) {
-                echo json_encode([
-                    'mensaje' => 'Registro eliminado correctamente',
+                    'mensaje' => 'Eliminado correctamente',
                     'codigo' => 1
                 ]);
-            } else {
+    
+            }else{
                 echo json_encode([
                     'mensaje' => 'Ocurrió un error al eliminar el registro',
                     'codigo' => 0
                 ]);
             }
+            
         } catch (Exception $e) {
             echo json_encode([
                 'detalle' => $e->getMessage(),
@@ -151,5 +127,6 @@ class ProductoController{
                 'codigo' => 0
             ]);
         }
-    }
+    
+}
 }
