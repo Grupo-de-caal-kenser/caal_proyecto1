@@ -76,7 +76,7 @@ class ProductoController{
         $producto_precio = $_POST['producto_precio'];
     
         try {
-            // First, retrieve the product by its ID
+            
             $producto = Producto::find($producto_id);
     
             if (!$producto) {
@@ -87,11 +87,11 @@ class ProductoController{
                 return;
             }
     
-            // Update the product data with the new values
+            
             $producto->producto_nombre = $producto_nombre;
             $producto->producto_precio = $producto_precio;
     
-            // Save the changes to the database
+            
             $resultado = $producto->guardar();
     
             if ($resultado['resultado'] == 1) {
